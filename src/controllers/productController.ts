@@ -1,10 +1,10 @@
-// src/controllers/productController.ts
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AppError } from '../middleware/errorMiddleware';
 import { getDatabase } from '../config/database';
 import { products } from '../models/schema';
 
-export const createProduct = async (req: Request, res: Response) => {
+
+export const createProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { name, description, price, stock } = req.body;
 
     const db = getDatabase();
@@ -26,6 +26,8 @@ export const createProduct = async (req: Request, res: Response) => {
     } catch (error) {
         throw new AppError('Product creation failed', 400);
     }
+
+    res.status(201).json({ message: 'Product created' });
 };
 
 export const getProducts = async (req: Request, res: Response) => {

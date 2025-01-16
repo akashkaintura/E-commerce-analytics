@@ -1,9 +1,14 @@
-// tests/integration/api.test.ts
+
 import request from 'supertest';
-import { app } from '../../src/index';
+import { server } from '../../src/index';
 import { getDatabase } from '../../src/config/database';
 import { users, products, orders } from '../../src/models/schema';
 import { UserRole } from '../../src/controllers/authController';
+import bcrypt from 'bcrypt';
+import { sql } from 'drizzle-orm';
+import '@types/jest';
+
+const app = server;
 
 describe('E-Commerce Analytics API Integration Tests', () => {
     let adminToken: string;

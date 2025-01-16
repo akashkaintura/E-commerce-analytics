@@ -8,6 +8,8 @@ import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
 import orderRoutes from './routes/orderRoutes';
 import logger from './utils/logger';
+// import { logger } from './services/loggingService';
+
 
 
 
@@ -34,6 +36,9 @@ class Server {
             allowedHeaders: ['Content-Type', 'Authorization']
         }));
 
+        // this.app.use(logger.httpLogger());
+        // this. app.use(logger.errorHandler);
+
         // Parse JSON bodies
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
@@ -48,6 +53,7 @@ class Server {
 
     private initializeErrorHandling() {
         this.app.use(errorHandler);
+        // this.app.use(logger.errorHandler);
     }
 
     public async start() {

@@ -1,6 +1,5 @@
-// src/routes/authRoutes.ts (add Swagger annotations)
 import { Router } from 'express';
-import { registerUser, loginUser } from '../controllers/authController';
+import { registerUser, loginUser, AuthController } from '../controllers/authController';
 
 /**
  * @swagger
@@ -61,6 +60,7 @@ import { registerUser, loginUser } from '../controllers/authController';
 
 const router = Router();
 
+router.post('/refresh-token', AuthController.refreshToken);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 

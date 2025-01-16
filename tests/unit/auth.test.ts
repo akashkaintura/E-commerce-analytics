@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../../src/index'; // Adjust the import based on your server setup
+import { app } from '../../src/index';
 
 describe('Auth Controller', () => {
     it('should register a new user', async () => {

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createProduct, getProducts } from '../controllers/productController';
-import { authorizeRoles } from '../controllers/authController';
+import { authorizeRoles, UserRole } from '../controllers/authController';
 
 /**
  * @swagger
@@ -50,7 +50,7 @@ import { authorizeRoles } from '../controllers/authController';
 
 const router = Router();
 
-router.post('/', authorizeRoles('admin'), createProduct);
+router.post('/', createProduct);
 router.get('/', getProducts);
 
 export default router;
