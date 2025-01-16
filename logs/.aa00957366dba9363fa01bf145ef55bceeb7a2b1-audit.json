@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/akashkaintura/Desktop/e-commerce-analytics/logs/.aa00957366dba9363fa01bf145ef55bceeb7a2b1-audit.json",
+    "files": [
+        {
+            "date": 1737035526517,
+            "name": "/Users/akashkaintura/Desktop/e-commerce-analytics/logs/combined-2025-01-16.log",
+            "hash": "7d4481439feccc59d7b1f76fa8f0cfeaf710581e737f922a4dfb2d0b0df01feb"
+        }
+    ],
+    "hashType": "sha256"
+}

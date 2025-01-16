@@ -122,7 +122,7 @@ export class AuthController {
         const { username, password } = parsed.data;
 
         const db = getDatabase();
-        const user = await db.select().from(users).where(eq(users.username, username)).first();
+        const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new AppError('Invalid credentials', 401);
@@ -131,13 +131,13 @@ export class AuthController {
         const accessToken = this.generateAccessToken({
             id: user.id,
             username: user.username,
-            role: user.role
+            role: user.role as UserRole
         });
 
         const refreshToken = this.generateRefreshToken({
             id: user.id,
             username: user.username,
-            role: user.role
+            role: user.role as UserRole
         });
 
         res.status(200).json({

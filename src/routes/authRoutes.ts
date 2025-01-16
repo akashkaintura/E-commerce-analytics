@@ -64,4 +64,7 @@ router.post('/refresh-token', AuthController.refreshToken);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
+//route for the swagger documentation
+// router.get('/api-docs', AuthController.swaggerDocs);
+
 export default router;

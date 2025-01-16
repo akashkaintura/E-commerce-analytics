@@ -2,17 +2,43 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import { errorHandler } from './middleware/errorMiddleware';
 import { connectDatabase } from './config/database';
 import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
 import orderRoutes from './routes/orderRoutes';
-import logger from './utils/logger';
-// import { logger } from './services/loggingService';
+import { logger } from './services/loggingService';
 
+// Swagger configuration
+const swaggerOptions: swaggerJsdoc.Options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'E-Commerce API',
+            version: '1.0.0',
+            description: 'E-Commerce API Documentation'
+        },
+        servers: [
+            {
+                url: process.env.API_URL || 'http://localhost:3000/api'
+            }
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        }
+    },
+    apis: ['./src/routes/*.ts', './src/controllers/*.ts']
+};
 
-
-
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Load environment variables
 dotenv.config();
@@ -23,12 +49,12 @@ class Server {
     constructor() {
         this.app = express();
         this.initializeMiddlewares();
+        this.initializeSwagger();
         this.initializeRoutes();
         this.initializeErrorHandling();
     }
 
     private initializeMiddlewares() {
-        // Security middlewares
         this.app.use(helmet());
         this.app.use(cors({
             origin: process.env.CORS_ORIGIN || '*',
@@ -36,24 +62,38 @@ class Server {
             allowedHeaders: ['Content-Type', 'Authorization']
         }));
 
-        // this.app.use(logger.httpLogger());
-        // this. app.use(logger.errorHandler);
+        this.app.use((req, res, next) => {
+            logger.info(`${req.method} ${req.path}`, {
+                method: req.method,
+                path: req.path,
+                body: req.body
+            });
+            next();
+        });
 
-        // Parse JSON bodies
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
     }
 
+    private initializeSwagger() {
+        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+        this.app.get('/health', (req, res) => {
+            res.status(200).json({
+                status: 'OK',
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+
     private initializeRoutes() {
-        // Placeholder for route imports
-        this.app.use('/api/auth', authRoutes);
-        this.app.use('/api/products', productRoutes);
-        this.app.use('/api/orders', orderRoutes);
+        this.app.use('/auth', authRoutes);
+        this.app.use('/products', productRoutes);
+        this.app.use('/orders', orderRoutes);
     }
 
     private initializeErrorHandling() {
         this.app.use(errorHandler);
-        // this.app.use(logger.errorHandler);
     }
 
     public async start() {
@@ -64,11 +104,21 @@ class Server {
             await connectDatabase();
 
             // Start server
-            this.app.listen(PORT, () => {
-                console.log(`Server running on port ${PORT}`);
+            const server = this.app.listen(PORT, () => {
+                logger.info(`Server running on port ${PORT}`);
+                logger.info(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+            });
+
+            // Graceful shutdown
+            process.on('SIGTERM', () => {
+                logger.info('SIGTERM received. Shutting down gracefully');
+                server.close(() => {
+                    logger.info('Server closed');
+                    process.exit(0);
+                });
             });
         } catch (error) {
-            console.error('Failed to start server:', error);
+            logger.error('Failed to start server', { error });
             process.exit(1);
         }
     }
@@ -77,3 +127,5 @@ class Server {
 // Initialize and start server
 const server = new Server();
 server.start();
+
+export { server };
