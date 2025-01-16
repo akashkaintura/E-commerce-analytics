@@ -7,7 +7,6 @@ import {
     timestamp,
     pgEnum
 } from 'drizzle-orm/pg-core';
-import e from 'express';
 
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),

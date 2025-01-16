@@ -1,34 +1,43 @@
 import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
 
-class AppError extends Error {
+export class AppError extends Error {
     statusCode: number;
-    status: string;
-    isOperational: boolean;
 
     constructor(message: string, statusCode: number) {
         super(message);
         this.statusCode = statusCode;
-        this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
-        this.isOperational = true;
-
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-const errorHandler = (
-    err: AppError,
+export const errorHandler = (
+    err: Error | AppError,
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
+    console.error('Error Handling Middleware:', err);
 
-    res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    if (err instanceof ZodError) {
+        return res.status(400).json({
+            status: 'error',
+            errors: err.errors.map(e => ({
+                path: e.path.join('.'),
+                message: e.message
+            }))
+        });
+    }
+
+    if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+            status: 'error',
+            message: err.message
+        });
+    }
+
+    res.status(500).json({
+        status: 'error',
+        message: 'Internal Server Error'
     });
 };
-
-export { AppError, errorHandler };
