@@ -21,7 +21,6 @@ interface TokenPayload {
 }
 
 export class AuthController {
-
     static generateAccessToken(user: TokenPayload): string {
         return jwt.sign(
             {
@@ -33,7 +32,6 @@ export class AuthController {
             { expiresIn: '15m' }
         );
     }
-
 
     static generateRefreshToken(user: TokenPayload): string {
         return jwt.sign(
@@ -49,7 +47,8 @@ export class AuthController {
 
 
     static async registerUser(req: Request, res: Response) {
-
+        console.log('AuthController: Register User Called');
+        console.log('Request Body:', req.body);
         const parsed = registerSchema.safeParse(req.body);
         if (!parsed.success) {
             throw new AppError('Validation failed', 400);
@@ -73,12 +72,16 @@ export class AuthController {
                 throw new AppError('User already exists', 409);
             }
 
+            //create new user
             const newUser = await db.insert(users).values({
                 username,
                 password: hashedPassword,
                 email,
-                role: role || UserRole.USER,
+                // role: role || UserRole.USER,
+                role: role || 'user'
             }).returning();
+
+            console.log('New User Created:', newUser);
 
             const accessToken = this.generateAccessToken({
                 id: newUser[0].id,

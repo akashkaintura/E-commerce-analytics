@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { createProduct, getProducts } from '../controllers/productController';
-import { authorizeRoles, UserRole } from '../controllers/authController';
 
 /**
  * @swagger
