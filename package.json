@@ -2,6 +2,7 @@
   "name": "e-commerce-analytics",
   "version": "1.0.0",
   "main": "index.js",
+  "author": "Akash Kaintura",
   "scripts": {
     "start": "npm run build && node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

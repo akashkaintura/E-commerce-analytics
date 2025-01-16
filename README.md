@@ -123,4 +123,7 @@ npm test
 - Performance benchmarks
 - Deployment instructions for different environments
 
-Would you like me to elaborate on any section or customize it further for your specific project?
+### Developer
+- **Name:** Akash Kaintura
+- **Contact:** akashkaintura.ak@gmail.com
+- **GitHub:** [akashkaintura](akashkaintura)
