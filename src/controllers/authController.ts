@@ -116,45 +116,49 @@ export class AuthController {
         }
     }
 
-    static async loginUser(req: Request, res: Response) {
-        const parsed = loginSchema.safeParse(req.body);
-        if (!parsed.success) {
-            throw new AppError('Validation failed', 400);
-        }
+    static async loginUser(req: Request, res: Response, next: NextFunction) {
+        try {
+            const parsed = loginSchema.safeParse(req.body);
+            if (!parsed.success) {
+                throw new AppError('Validation failed', 400);
+            }
 
-        const { username, password } = parsed.data;
+            const { username, password } = parsed.data;
 
-        const db = getDatabase();
-        const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+            const db = getDatabase();
+            const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            throw new AppError('Invalid credentials', 401);
-        }
+            if (!user || !(await bcrypt.compare(password, user.password))) {
+                throw new AppError('Invalid credentials', 401);
+            }
 
-        const accessToken = this.generateAccessToken({
-            id: user.id,
-            username: user.username,
-            role: user.role as UserRole
-        });
+            const accessToken = AuthController.generateAccessToken({
+                id: user.id,
+                username: user.username,
+                role: user.role as UserRole
+            });
 
-        const refreshToken = this.generateRefreshToken({
-            id: user.id,
-            username: user.username,
-            role: user.role as UserRole
-        });
+            const refreshToken = AuthController.generateRefreshToken({
+                id: user.id,
+                username: user.username,
+                role: user.role as UserRole
+            });
 
-        res.status(200).json({
-            status: 'success',
-            data: {
-                user: {
-                    id: user.id,
-                    username: user.username,
-                    role: user.role
+            res.status(200).json({
+                status: 'success',
+                data: {
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        role: user.role
+                    },
+                    accessToken,
+                    refreshToken,
                 },
-                accessToken,
-                refreshToken,
-            },
-        });
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 
     static async refreshToken(req: Request, res: Response, next: NextFunction) {
